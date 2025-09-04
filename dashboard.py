@@ -20,7 +20,7 @@ st.set_page_config(
 # データ読み込み関数
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r'C:\Users\fopwy\OneDrive\Desktop\report\Superstore.csv\Sample - Superstore.csv', encoding='latin-1')
+    df = pd.read_csv('Sample - Superstore.csv', encoding='latin-1')
     df['Order Date'] = pd.to_datetime(df['Order Date'])
     df['Year'] = df['Order Date'].dt.year
     df['Month'] = df['Order Date'].dt.month
