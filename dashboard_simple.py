@@ -219,9 +219,60 @@ def main():
     except:
         selected_categories = []
 
+    # セグメントフィルター
+    try:
+        if 'Segment' in df.columns:
+            segments = sorted(df['Segment'].dropna().unique())
+            selected_segments = st.sidebar.multiselect(
+                "👥 顧客セグメントを選択",
+                options=segments,
+                default=segments
+            )
+        else:
+            selected_segments = []
+    except:
+        selected_segments = []
+
+    # 配送方法フィルター
+    try:
+        if 'Ship Mode' in df.columns:
+            ship_modes = sorted(df['Ship Mode'].dropna().unique())
+            selected_ship_modes = st.sidebar.multiselect(
+                "🚚 配送方法を選択",
+                options=ship_modes,
+                default=ship_modes
+            )
+        else:
+            selected_ship_modes = []
+    except:
+        selected_ship_modes = []
+
+    # 売上範囲フィルター
+    try:
+        min_sales = float(df['Sales'].min())
+        max_sales = float(df['Sales'].max())
+        sales_range = st.sidebar.slider(
+            "💰 売上範囲を選択",
+            min_value=min_sales,
+            max_value=max_sales,
+            value=(min_sales, max_sales),
+            format="$%.0f"
+        )
+    except:
+        sales_range = (0, 10000)
+
+    # 利益フィルター
+    st.sidebar.markdown("---")
+    profit_filter = st.sidebar.radio(
+        "📊 利益フィルター",
+        options=["すべて", "利益のみ", "損失のみ"],
+        index=0
+    )
+
     # データフィルタリング
     filtered_df = df.copy()
 
+    # 基本フィルター
     if selected_years:
         filtered_df = filtered_df[filtered_df['Year'].isin(selected_years)]
     if selected_regions:
@@ -229,10 +280,62 @@ def main():
     if selected_categories:
         filtered_df = filtered_df[filtered_df['Category'].isin(selected_categories)]
 
+    # 新しいフィルター
+    if selected_segments and 'Segment' in filtered_df.columns:
+        filtered_df = filtered_df[filtered_df['Segment'].isin(selected_segments)]
+    if selected_ship_modes and 'Ship Mode' in filtered_df.columns:
+        filtered_df = filtered_df[filtered_df['Ship Mode'].isin(selected_ship_modes)]
+
+    # 売上範囲フィルター
+    filtered_df = filtered_df[
+        (filtered_df['Sales'] >= sales_range[0]) &
+        (filtered_df['Sales'] <= sales_range[1])
+    ]
+
+    # 利益フィルター
+    if profit_filter == "利益のみ":
+        filtered_df = filtered_df[filtered_df['Profit'] > 0]
+    elif profit_filter == "損失のみ":
+        filtered_df = filtered_df[filtered_df['Profit'] < 0]
+
     # データが空の場合の処理
     if len(filtered_df) == 0:
         st.warning("⚠️ 選択した条件に該当するデータがありません。フィルターを調整してください。")
         return
+
+    # フィルター情報の表示
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("📋 現在のフィルター状況")
+    st.sidebar.info(f"**表示中のデータ**: {len(filtered_df):,}件 / {len(df):,}件")
+
+    if len(filtered_df) < len(df):
+        filter_info = []
+        if len(selected_years) < len(years):
+            filter_info.append(f"年: {len(selected_years)}件選択")
+        if len(selected_regions) < len(regions):
+            filter_info.append(f"地域: {len(selected_regions)}件選択")
+        if len(selected_categories) < len(categories):
+            filter_info.append(f"カテゴリ: {len(selected_categories)}件選択")
+        if selected_segments and len(selected_segments) < len(segments):
+            filter_info.append(f"セグメント: {len(selected_segments)}件選択")
+        if selected_ship_modes and len(selected_ship_modes) < len(ship_modes):
+            filter_info.append(f"配送: {len(selected_ship_modes)}件選択")
+        if sales_range != (min_sales, max_sales):
+            filter_info.append(f"売上: ${sales_range[0]:,.0f}-${sales_range[1]:,.0f}")
+        if profit_filter != "すべて":
+            filter_info.append(f"利益: {profit_filter}")
+
+        if filter_info:
+            st.sidebar.write("**適用中のフィルター:**")
+            for info in filter_info:
+                st.sidebar.write(f"• {info}")
+
+    # リセットボタン
+    if st.sidebar.button("🔄 フィルターをリセット"):
+        try:
+            st.rerun()
+        except:
+            st.experimental_rerun()
 
     # 損失データの計算
     try:
