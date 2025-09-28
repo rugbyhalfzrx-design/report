@@ -289,8 +289,8 @@ def main():
         except Exception as e:
             st.error(f"月別売上トレンドエラー: {str(e)}")
 
-        # 2つのコラム
-        col1, col2 = st.columns(2)
+        # 3つのコラム
+        col1, col2, col3 = st.columns(3)
 
         with col1:
             # 地域別売上
@@ -308,6 +308,30 @@ def main():
                 st.error(f"地域別売上エラー: {str(e)}")
 
         with col2:
+            # 地域別顧客数
+            try:
+                if 'Customer ID' in filtered_df.columns:
+                    region_customers = filtered_df.groupby('Region')['Customer ID'].nunique().reset_index()
+                    region_customers.columns = ['Region', 'Customer_Count']
+
+                    if len(region_customers) > 0:
+                        fig_region_customers = px.bar(
+                            region_customers,
+                            x='Region',
+                            y='Customer_Count',
+                            title='👥 地域別顧客数',
+                            color='Customer_Count',
+                            color_continuous_scale='Greens',
+                            text='Customer_Count'
+                        )
+                        fig_region_customers.update_traces(texttemplate='%{text}', textposition='outside')
+                        st.plotly_chart(fig_region_customers, use_container_width=True)
+                else:
+                    st.info("顧客IDデータが利用できません")
+            except Exception as e:
+                st.error(f"地域別顧客数エラー: {str(e)}")
+
+        with col3:
             # カテゴリ別売上
             try:
                 category_sales = filtered_df.groupby('Category')['Sales'].sum().reset_index()
@@ -457,6 +481,63 @@ def main():
 
     with tab4:
         st.subheader("🚀 高度なビジネス分析")
+
+        # 地域別詳細分析
+        st.markdown("### 🌍 地域別詳細分析")
+        try:
+            if 'Customer ID' in filtered_df.columns:
+                # 地域別総合分析
+                regional_analysis = filtered_df.groupby('Region').agg({
+                    'Sales': ['sum', 'mean'],
+                    'Profit': ['sum', 'mean'],
+                    'Customer ID': 'nunique',
+                    'Discount': 'mean'
+                }).round(2)
+
+                regional_analysis.columns = ['総売上', '平均売上', '総利益', '平均利益', '顧客数', '平均割引率']
+                regional_analysis['利益率'] = (regional_analysis['総利益'] / regional_analysis['総売上'] * 100).round(2)
+                regional_analysis['顧客単価'] = (regional_analysis['総売上'] / regional_analysis['顧客数']).round(2)
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    # 地域別顧客数と売上の関係
+                    fig_region_scatter = px.scatter(
+                        x=regional_analysis['顧客数'],
+                        y=regional_analysis['総売上'],
+                        size=regional_analysis['利益率'],
+                        hover_name=regional_analysis.index,
+                        title='📊 地域別：顧客数 vs 売上（バブルサイズ=利益率）',
+                        labels={'x': '顧客数', 'y': '総売上'},
+                        color=regional_analysis['利益率'],
+                        color_continuous_scale='RdYlGn'
+                    )
+                    st.plotly_chart(fig_region_scatter, use_container_width=True)
+
+                with col2:
+                    # 地域別顧客単価
+                    fig_customer_value = px.bar(
+                        x=regional_analysis.index,
+                        y=regional_analysis['顧客単価'],
+                        title='💰 地域別顧客単価',
+                        labels={'x': '地域', 'y': '顧客単価 ($)'},
+                        color=regional_analysis['顧客単価'],
+                        color_continuous_scale='Blues',
+                        text=regional_analysis['顧客単価']
+                    )
+                    fig_customer_value.update_traces(texttemplate='$%{text:,.0f}', textposition='outside')
+                    st.plotly_chart(fig_customer_value, use_container_width=True)
+
+                # 地域別統計テーブル
+                st.subheader("📋 地域別統合レポート")
+                st.dataframe(regional_analysis, use_container_width=True)
+
+            else:
+                st.info("顧客IDデータが利用できないため、地域別詳細分析をスキップします")
+        except Exception as e:
+            st.error(f"地域別詳細分析エラー: {str(e)}")
+
+        st.markdown("---")
 
         # 配送方法分析
         if 'Ship Mode' in filtered_df.columns:
