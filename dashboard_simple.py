@@ -79,8 +79,13 @@ def main():
         (df['Category'].isin(selected_categories))
     ]
     
+    # 損失データの計算
+    loss_orders = filtered_df[filtered_df['Profit'] < 0]
+    total_loss = abs(loss_orders['Profit'].sum())
+    loss_rate = len(loss_orders) / len(filtered_df) * 100 if len(filtered_df) > 0 else 0
+
     # KPI表示
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         total_sales = filtered_df['Sales'].sum()
@@ -98,11 +103,14 @@ def main():
     with col4:
         avg_order = filtered_df['Sales'].mean()
         st.metric("💳 平均注文額", f"${avg_order:.2f}")
+
+    with col5:
+        st.metric("⚠️ 総損失", f"${total_loss:,.0f}", f"{loss_rate:.1f}%")
     
     st.markdown("---")
     
     # タブ作成
-    tab1, tab2, tab3 = st.tabs(["📈 売上分析", "🎯 詳細分析", "📊 データ"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📈 売上分析", "🎯 詳細分析", "⚠️ 損失分析", "📊 データ"])
     
     with tab1:
         # 月別売上トレンド
@@ -192,8 +200,142 @@ def main():
             )
             fig_products.update_layout(height=400)
             st.plotly_chart(fig_products, use_container_width=True)
-    
+
     with tab3:
+        st.subheader("⚠️ 損失分析ダッシュボード")
+
+        if len(loss_orders) > 0:
+            # 損失サマリー
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                st.metric("🔴 損失注文数", f"{len(loss_orders):,}")
+
+            with col2:
+                avg_loss = loss_orders['Profit'].mean()
+                st.metric("📉 平均損失額", f"${abs(avg_loss):.2f}")
+
+            with col3:
+                worst_loss = loss_orders['Profit'].min()
+                st.metric("💥 最大損失", f"${abs(worst_loss):.2f}")
+
+            with col4:
+                loss_vs_sales = (total_loss / total_sales * 100) if total_sales > 0 else 0
+                st.metric("📊 損失率", f"{loss_vs_sales:.2f}%")
+
+            st.markdown("---")
+
+            # 損失分析グラフ
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # 地域別損失
+                region_loss = loss_orders.groupby('Region')['Profit'].sum().abs().reset_index()
+                region_loss.columns = ['Region', 'Loss']
+
+                fig_region_loss = px.bar(
+                    region_loss,
+                    x='Region',
+                    y='Loss',
+                    title='🌍 地域別損失額',
+                    color='Loss',
+                    color_continuous_scale='Reds'
+                )
+                st.plotly_chart(fig_region_loss, use_container_width=True)
+
+            with col2:
+                # カテゴリ別損失
+                category_loss = loss_orders.groupby('Category')['Profit'].sum().abs().reset_index()
+                category_loss.columns = ['Category', 'Loss']
+
+                fig_category_loss = px.pie(
+                    category_loss,
+                    values='Loss',
+                    names='Category',
+                    title='📦 カテゴリ別損失分布',
+                    color_discrete_sequence=px.colors.sequential.Reds_r
+                )
+                st.plotly_chart(fig_category_loss, use_container_width=True)
+
+            # 月別損失トレンド
+            monthly_loss = loss_orders.groupby('YearMonth')['Profit'].sum().abs().reset_index()
+            monthly_loss.columns = ['YearMonth', 'Loss']
+
+            fig_monthly_loss = px.line(
+                monthly_loss,
+                x='YearMonth',
+                y='Loss',
+                title='📅 月別損失トレンド',
+                markers=True,
+                line_shape='spline'
+            )
+            fig_monthly_loss.update_traces(line_color='red')
+            fig_monthly_loss.update_layout(xaxis_tickangle=-45)
+            st.plotly_chart(fig_monthly_loss, use_container_width=True)
+
+            # セグメント別損失詳細
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # セグメント別損失
+                segment_loss = loss_orders.groupby('Segment').agg({
+                    'Profit': ['sum', 'mean', 'count']
+                }).round(2)
+                segment_loss.columns = ['総損失', '平均損失', '損失注文数']
+                segment_loss['総損失'] = abs(segment_loss['総損失'])
+                segment_loss['平均損失'] = abs(segment_loss['平均損失'])
+
+                st.subheader("👥 セグメント別損失詳細")
+                st.dataframe(segment_loss, use_container_width=True)
+
+            with col2:
+                # 最大損失商品TOP10
+                top_loss_products = loss_orders.nsmallest(10, 'Profit')[['Product Name', 'Profit', 'Sales', 'Category']].copy()
+                top_loss_products['Profit'] = abs(top_loss_products['Profit'])
+                top_loss_products.columns = ['商品名', '損失額', '売上', 'カテゴリ']
+
+                st.subheader("💥 最大損失商品TOP10")
+                st.dataframe(top_loss_products, use_container_width=True)
+
+            # 損失要因分析
+            st.subheader("🔍 損失要因分析")
+
+            # 割引と損失の関係
+            discount_loss = loss_orders.copy()
+            discount_loss['Discount_Range'] = pd.cut(
+                discount_loss['Discount'],
+                bins=[0, 0.1, 0.3, 0.5, 1.0],
+                labels=['0-10%', '10-30%', '30-50%', '50%+']
+            )
+
+            discount_analysis = discount_loss.groupby('Discount_Range').agg({
+                'Profit': ['sum', 'count'],
+                'Sales': 'sum'
+            }).round(2)
+            discount_analysis.columns = ['総損失', '件数', '売上']
+            discount_analysis['総損失'] = abs(discount_analysis['総損失'])
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                fig_discount = px.bar(
+                    x=discount_analysis.index,
+                    y=discount_analysis['総損失'],
+                    title='💸 割引率別損失額',
+                    labels={'x': '割引率', 'y': '損失額'},
+                    color=discount_analysis['総損失'],
+                    color_continuous_scale='Reds'
+                )
+                st.plotly_chart(fig_discount, use_container_width=True)
+
+            with col2:
+                st.write("**割引率別損失分析**")
+                st.dataframe(discount_analysis, use_container_width=True)
+
+        else:
+            st.success("🎉 選択された期間・条件では損失は発生していません！")
+
+    with tab4:
         st.subheader("📋 データサマリー")
         
         # データ基本情報
