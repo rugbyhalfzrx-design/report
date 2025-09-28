@@ -247,19 +247,6 @@ def main():
     except:
         selected_ship_modes = []
 
-    # 売上範囲フィルター
-    try:
-        min_sales = float(df['Sales'].min())
-        max_sales = float(df['Sales'].max())
-        sales_range = st.sidebar.slider(
-            "💰 売上範囲を選択",
-            min_value=min_sales,
-            max_value=max_sales,
-            value=(min_sales, max_sales),
-            format="$%.0f"
-        )
-    except:
-        sales_range = (0, 10000)
 
     # 利益フィルター
     st.sidebar.markdown("---")
@@ -286,11 +273,6 @@ def main():
     if selected_ship_modes and 'Ship Mode' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['Ship Mode'].isin(selected_ship_modes)]
 
-    # 売上範囲フィルター
-    filtered_df = filtered_df[
-        (filtered_df['Sales'] >= sales_range[0]) &
-        (filtered_df['Sales'] <= sales_range[1])
-    ]
 
     # 利益フィルター
     if profit_filter == "利益のみ":
@@ -320,8 +302,6 @@ def main():
             filter_info.append(f"セグメント: {len(selected_segments)}件選択")
         if selected_ship_modes and len(selected_ship_modes) < len(ship_modes):
             filter_info.append(f"配送: {len(selected_ship_modes)}件選択")
-        if sales_range != (min_sales, max_sales):
-            filter_info.append(f"売上: ${sales_range[0]:,.0f}-${sales_range[1]:,.0f}")
         if profit_filter != "すべて":
             filter_info.append(f"利益: {profit_filter}")
 
@@ -601,35 +581,18 @@ def main():
                 regional_analysis['利益率'] = (regional_analysis['総利益'] / regional_analysis['総売上'] * 100).round(2)
                 regional_analysis['顧客単価'] = (regional_analysis['総売上'] / regional_analysis['顧客数']).round(2)
 
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    # 地域別顧客数と売上の関係
-                    fig_region_scatter = px.scatter(
-                        x=regional_analysis['顧客数'],
-                        y=regional_analysis['総売上'],
-                        size=regional_analysis['利益率'],
-                        hover_name=regional_analysis.index,
-                        title='📊 地域別：顧客数 vs 売上（バブルサイズ=利益率）',
-                        labels={'x': '顧客数', 'y': '総売上'},
-                        color=regional_analysis['利益率'],
-                        color_continuous_scale='RdYlGn'
-                    )
-                    st.plotly_chart(fig_region_scatter, use_container_width=True)
-
-                with col2:
-                    # 地域別顧客単価
-                    fig_customer_value = px.bar(
-                        x=regional_analysis.index,
-                        y=regional_analysis['顧客単価'],
-                        title='💰 地域別顧客単価',
-                        labels={'x': '地域', 'y': '顧客単価 ($)'},
-                        color=regional_analysis['顧客単価'],
-                        color_continuous_scale='Blues',
-                        text=regional_analysis['顧客単価']
-                    )
-                    fig_customer_value.update_traces(texttemplate='$%{text:,.0f}', textposition='outside')
-                    st.plotly_chart(fig_customer_value, use_container_width=True)
+                # 地域別顧客単価（単独表示）
+                fig_customer_value = px.bar(
+                    x=regional_analysis.index,
+                    y=regional_analysis['顧客単価'],
+                    title='💰 地域別顧客単価',
+                    labels={'x': '地域', 'y': '顧客単価 ($)'},
+                    color=regional_analysis['顧客単価'],
+                    color_continuous_scale='Blues',
+                    text=regional_analysis['顧客単価']
+                )
+                fig_customer_value.update_traces(texttemplate='$%{text:,.0f}', textposition='outside')
+                st.plotly_chart(fig_customer_value, use_container_width=True)
 
                 # 地域別統計テーブル
                 st.subheader("📋 地域別統合レポート")
