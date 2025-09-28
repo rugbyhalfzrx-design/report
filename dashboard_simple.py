@@ -28,11 +28,17 @@ def load_data():
             st.info("ファイルが同じディレクトリにあることを確認してください")
             st.stop()
     
-    # 日付変換
+    # 日付変換と追加的な特徴量作成
     df['Order Date'] = pd.to_datetime(df['Order Date'], format='%m/%d/%Y')
+    df['Ship Date'] = pd.to_datetime(df['Ship Date'], format='%m/%d/%Y')
     df['Year'] = df['Order Date'].dt.year
     df['Month'] = df['Order Date'].dt.month
+    df['Quarter'] = df['Order Date'].dt.quarter
+    df['Weekday'] = df['Order Date'].dt.day_name()
     df['YearMonth'] = df['Order Date'].dt.to_period('M').astype(str)
+    df['Shipping_Days'] = (df['Ship Date'] - df['Order Date']).dt.days
+    df['Profit_Margin'] = (df['Profit'] / df['Sales'] * 100).round(2)
+    df['Profit_Margin'] = df['Profit_Margin'].replace([np.inf, -np.inf], 0)
     
     return df
 
@@ -110,7 +116,7 @@ def main():
     st.markdown("---")
     
     # タブ作成
-    tab1, tab2, tab3, tab4 = st.tabs(["📈 売上分析", "🎯 詳細分析", "⚠️ 損失分析", "📊 データ"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 売上分析", "🎯 詳細分析", "⚠️ 損失分析", "🚀 高度な分析", "📊 データ"])
     
     with tab1:
         # 月別売上トレンド
@@ -339,6 +345,256 @@ def main():
             st.success("🎉 選択された期間・条件では損失は発生していません！")
 
     with tab4:
+        st.subheader("🚀 高度なビジネス分析")
+
+        # 配送方法分析
+        st.markdown("### 📦 配送方法分析")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # 配送方法別売上と利益
+            shipping_analysis = filtered_df.groupby('Ship Mode').agg({
+                'Sales': 'sum',
+                'Profit': 'sum',
+                'Shipping_Days': 'mean',
+                'Order ID': 'count'
+            }).round(2)
+            shipping_analysis.columns = ['売上', '利益', '平均配送日数', '注文数']
+            shipping_analysis['利益率'] = (shipping_analysis['利益'] / shipping_analysis['売上'] * 100).round(2)
+
+            fig_shipping = px.bar(
+                x=shipping_analysis.index,
+                y=shipping_analysis['売上'],
+                title='🚚 配送方法別売上',
+                labels={'x': '配送方法', 'y': '売上'},
+                color=shipping_analysis['売上'],
+                color_continuous_scale='Blues'
+            )
+            st.plotly_chart(fig_shipping, use_container_width=True)
+
+        with col2:
+            # 配送日数 vs 利益率
+            fig_shipping_efficiency = px.scatter(
+                x=shipping_analysis['平均配送日数'],
+                y=shipping_analysis['利益率'],
+                size=shipping_analysis['注文数'],
+                hover_name=shipping_analysis.index,
+                title='📊 配送日数 vs 利益率',
+                labels={'x': '平均配送日数', 'y': '利益率(%)'}
+            )
+            st.plotly_chart(fig_shipping_efficiency, use_container_width=True)
+
+        st.dataframe(shipping_analysis, use_container_width=True)
+
+        # 利益率分析
+        st.markdown("### 🎯 利益率分析")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # 利益率の分布
+            fig_profit_dist = px.histogram(
+                filtered_df,
+                x='Profit_Margin',
+                bins=50,
+                title='📈 利益率の分布',
+                labels={'x': '利益率(%)', 'y': '频度'}
+            )
+            fig_profit_dist.add_vline(x=filtered_df['Profit_Margin'].mean(), line_dash="dash", line_color="red")
+            st.plotly_chart(fig_profit_dist, use_container_width=True)
+
+        with col2:
+            # カツゴリ別利益率
+            category_profit = filtered_df.groupby('Category')['Profit_Margin'].mean().reset_index()
+            fig_category_profit = px.bar(
+                category_profit,
+                x='Category',
+                y='Profit_Margin',
+                title='📦 カテゴリ別平均利益率',
+                color='Profit_Margin',
+                color_continuous_scale='RdYlGn'
+            )
+            st.plotly_chart(fig_category_profit, use_container_width=True)
+
+        # 季節性分析
+        st.markdown("### 🍃 季節性分析")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # 四半期別分析
+            quarterly_sales = filtered_df.groupby(['Year', 'Quarter'])['Sales'].sum().reset_index()
+            quarterly_sales['Year_Quarter'] = quarterly_sales['Year'].astype(str) + '-Q' + quarterly_sales['Quarter'].astype(str)
+
+            fig_quarterly = px.line(
+                quarterly_sales,
+                x='Year_Quarter',
+                y='Sales',
+                title='📅 四半期別売上トレンド',
+                markers=True
+            )
+            fig_quarterly.update_xaxes(type='category')
+            st.plotly_chart(fig_quarterly, use_container_width=True)
+
+        with col2:
+            # 曜日別パターン
+            weekday_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            weekday_sales = filtered_df.groupby('Weekday')['Sales'].mean().reindex(weekday_order).reset_index()
+
+            fig_weekday = px.bar(
+                weekday_sales,
+                x='Weekday',
+                y='Sales',
+                title='📅 曜日別平均売上',
+                color='Sales',
+                color_continuous_scale='Viridis'
+            )
+            st.plotly_chart(fig_weekday, use_container_width=True)
+
+        # 割引分析
+        st.markdown("### 💸 割引効果分析")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # 割引率 vs 売上の関係
+            fig_discount_sales = px.scatter(
+                filtered_df.sample(min(1000, len(filtered_df))),
+                x='Discount',
+                y='Sales',
+                color='Category',
+                title='📊 割引率 vs 売上の関係',
+                labels={'x': '割引率', 'y': '売上'},
+                opacity=0.7
+            )
+            st.plotly_chart(fig_discount_sales, use_container_width=True)
+
+        with col2:
+            # 割引率別利益率
+            discount_bins = pd.cut(filtered_df['Discount'], bins=5, labels=['0-20%', '20-40%', '40-60%', '60-80%', '80-100%'])
+            discount_profit = filtered_df.groupby(discount_bins)['Profit_Margin'].mean().reset_index()
+
+            fig_discount_profit = px.bar(
+                discount_profit,
+                x='Discount',
+                y='Profit_Margin',
+                title='📈 割引率別平均利益率',
+                color='Profit_Margin',
+                color_continuous_scale='RdYlGn'
+            )
+            st.plotly_chart(fig_discount_profit, use_container_width=True)
+
+        # リピート顧客分析
+        st.markdown("### 🔄 リピート顧客分析")
+
+        # 顧客別注文回数
+        customer_orders = filtered_df.groupby('Customer ID').agg({
+            'Order ID': 'nunique',
+            'Sales': 'sum',
+            'Profit': 'sum'
+        }).reset_index()
+        customer_orders.columns = ['Customer_ID', 'Order_Count', 'Total_Sales', 'Total_Profit']
+        customer_orders['Customer_Type'] = customer_orders['Order_Count'].apply(
+            lambda x: 'New (1回)' if x == 1 else 'Repeat (2+回)'
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # 新規 vs リピートの売上比較
+            customer_type_analysis = customer_orders.groupby('Customer_Type').agg({
+                'Customer_ID': 'count',
+                'Total_Sales': 'sum',
+                'Total_Profit': 'sum'
+            }).reset_index()
+            customer_type_analysis.columns = ['顧客タイプ', '顧客数', '総売上', '総利益']
+
+            fig_customer_type = px.pie(
+                customer_type_analysis,
+                values='総売上',
+                names='顧客タイプ',
+                title='👥 新規 vs リピート顧客の売上比率'
+            )
+            st.plotly_chart(fig_customer_type, use_container_width=True)
+
+        with col2:
+            # 注文回数の分布
+            fig_order_dist = px.histogram(
+                customer_orders,
+                x='Order_Count',
+                bins=20,
+                title='📈 顧客別注文回数の分布',
+                labels={'x': '注文回数', 'y': '顧客数'}
+            )
+            st.plotly_chart(fig_order_dist, use_container_width=True)
+
+        st.dataframe(customer_type_analysis, use_container_width=True)
+
+        # 成長率分析
+        st.markdown("### 📈 成長率分析")
+
+        if len(filtered_df['Year'].unique()) > 1:
+            yearly_growth = filtered_df.groupby('Year')['Sales'].sum().reset_index()
+            yearly_growth['Growth_Rate'] = yearly_growth['Sales'].pct_change() * 100
+            yearly_growth['Growth_Rate'] = yearly_growth['Growth_Rate'].fillna(0)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                fig_growth = px.bar(
+                    yearly_growth[yearly_growth['Year'] > yearly_growth['Year'].min()],
+                    x='Year',
+                    y='Growth_Rate',
+                    title='📈 年次成長率',
+                    labels={'x': '年', 'y': '成長率(%)'},
+                    color='Growth_Rate',
+                    color_continuous_scale='RdYlGn'
+                )
+                fig_growth.update_xaxes(type='category')
+                st.plotly_chart(fig_growth, use_container_width=True)
+
+            with col2:
+                # 月別成長率（前年同月比）
+                monthly_growth = filtered_df.groupby(['Year', 'Month'])['Sales'].sum().reset_index()
+                monthly_growth['YoY_Growth'] = monthly_growth.groupby('Month')['Sales'].pct_change(periods=1) * 100
+                monthly_growth = monthly_growth.dropna()
+                monthly_growth['Year_Month'] = monthly_growth['Year'].astype(str) + '-' + monthly_growth['Month'].astype(str).str.zfill(2)
+
+                fig_monthly_growth = px.line(
+                    monthly_growth,
+                    x='Year_Month',
+                    y='YoY_Growth',
+                    title='📅 月別成長率',
+                    markers=True,
+                    labels={'x': '年月', 'y': '成長率(%)'}
+                )
+                fig_monthly_growth.update_xaxes(type='category')
+                st.plotly_chart(fig_monthly_growth, use_container_width=True)
+        else:
+            st.info("📊 成長率分析には複数年のデータが必要です")
+
+        # 相関分析
+        st.markdown("### 🔗 相関分析")
+
+        # 数値変数の相関マトリックス
+        numeric_cols = ['Sales', 'Profit', 'Quantity', 'Discount', 'Profit_Margin', 'Shipping_Days']
+        correlation_matrix = filtered_df[numeric_cols].corr()
+
+        fig_corr = px.imshow(
+            correlation_matrix,
+            text_auto=True,
+            aspect="auto",
+            title="🔗 数値変数間の相関係数",
+            color_continuous_scale='RdBu_r'
+        )
+        st.plotly_chart(fig_corr, use_container_width=True)
+
+        # 相関係数の解釈
+        st.markdown("""
+        **相関係数の解釈:**
+        - 1.0：完全な正の相関
+        - 0.0：相関なし
+        - -1.0：完全な負の相関
+        """)
+
+    with tab5:
         st.subheader("📋 データサマリー")
         
         # データ基本情報
