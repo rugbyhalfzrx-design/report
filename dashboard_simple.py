@@ -106,7 +106,7 @@ def load_data():
     return df
 
 # 安全なグラフ作成関数
-def safe_histogram(data, column, title, bins=50, x_label=None, y_label='頻度'):
+def safe_histogram(data, column, title, nbins=50, x_label=None, y_label='頻度'):
     """安全なヒストグラム作成"""
     try:
         if column not in data.columns:
@@ -118,9 +118,10 @@ def safe_histogram(data, column, title, bins=50, x_label=None, y_label='頻度')
             st.warning(f"{title}: データが空です")
             return None
 
+        # plotlyのヒストグラムは nbins パラメータを使用
         fig = px.histogram(
             x=clean_data,
-            bins=min(bins, len(clean_data.unique())),
+            nbins=min(nbins, len(clean_data.unique())),
             title=title,
             labels={'x': x_label or column, 'y': y_label}
         )
@@ -503,7 +504,7 @@ def main():
                 filtered_df,
                 'Profit_Margin',
                 '📈 利益率の分布',
-                bins=50,
+                nbins=50,
                 x_label='利益率(%)'
             )
             if fig:
