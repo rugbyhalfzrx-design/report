@@ -4,6 +4,8 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
+import warnings
+warnings.filterwarnings('ignore')
 
 # ページ設定
 st.set_page_config(
@@ -29,15 +31,24 @@ def load_data():
             st.stop()
     
     # 日付変換と追加的な特徴量作成
-    df['Order Date'] = pd.to_datetime(df['Order Date'], format='%m/%d/%Y')
-    df['Ship Date'] = pd.to_datetime(df['Ship Date'], format='%m/%d/%Y')
+    try:
+        df['Order Date'] = pd.to_datetime(df['Order Date'], format='%m/%d/%Y')
+        df['Ship Date'] = pd.to_datetime(df['Ship Date'], format='%m/%d/%Y')
+    except:
+        df['Order Date'] = pd.to_datetime(df['Order Date'])
+        df['Ship Date'] = pd.to_datetime(df['Ship Date'])
+
     df['Year'] = df['Order Date'].dt.year
     df['Month'] = df['Order Date'].dt.month
     df['Quarter'] = df['Order Date'].dt.quarter
     df['Weekday'] = df['Order Date'].dt.day_name()
     df['YearMonth'] = df['Order Date'].dt.to_period('M').astype(str)
     df['Shipping_Days'] = (df['Ship Date'] - df['Order Date']).dt.days
-    df['Profit_Margin'] = (df['Profit'] / df['Sales'] * 100).round(2)
+
+    # 安全な利益率計算
+    df['Profit_Margin'] = 0.0
+    valid_sales = df['Sales'] != 0
+    df.loc[valid_sales, 'Profit_Margin'] = (df.loc[valid_sales, 'Profit'] / df.loc[valid_sales, 'Sales'] * 100).round(2)
     df['Profit_Margin'] = df['Profit_Margin'].replace([np.inf, -np.inf], 0)
     
     return df
@@ -468,18 +479,25 @@ def main():
 
         with col2:
             # 割引率別利益率
-            discount_bins = pd.cut(filtered_df['Discount'], bins=5, labels=['0-20%', '20-40%', '40-60%', '60-80%', '80-100%'])
-            discount_profit = filtered_df.groupby(discount_bins)['Profit_Margin'].mean().reset_index()
+            try:
+                discount_bins = pd.cut(filtered_df['Discount'], bins=5, labels=['0-20%', '20-40%', '40-60%', '60-80%', '80-100%'])
+                discount_profit = filtered_df.groupby(discount_bins)['Profit_Margin'].mean().reset_index()
+            except Exception as e:
+                st.error(f"割引分析エラー: {str(e)}")
+                discount_profit = pd.DataFrame({'Discount': [], 'Profit_Margin': []})
 
-            fig_discount_profit = px.bar(
-                discount_profit,
-                x='Discount',
-                y='Profit_Margin',
-                title='📈 割引率別平均利益率',
-                color='Profit_Margin',
-                color_continuous_scale='RdYlGn'
-            )
-            st.plotly_chart(fig_discount_profit, use_container_width=True)
+            if not discount_profit.empty:
+                fig_discount_profit = px.bar(
+                    discount_profit,
+                    x='Discount',
+                    y='Profit_Margin',
+                    title='📈 割引率別平均利益率',
+                    color='Profit_Margin',
+                    color_continuous_scale='RdYlGn'
+                )
+                st.plotly_chart(fig_discount_profit, use_container_width=True)
+            else:
+                st.warning("割引データが不十分です")
 
         # リピート顧客分析
         st.markdown("### 🔄 リピート顧客分析")
@@ -551,22 +569,29 @@ def main():
                 st.plotly_chart(fig_growth, use_container_width=True)
 
             with col2:
-                # 月別成長率（前年同月比）
-                monthly_growth = filtered_df.groupby(['Year', 'Month'])['Sales'].sum().reset_index()
-                monthly_growth['YoY_Growth'] = monthly_growth.groupby('Month')['Sales'].pct_change(periods=1) * 100
-                monthly_growth = monthly_growth.dropna()
-                monthly_growth['Year_Month'] = monthly_growth['Year'].astype(str) + '-' + monthly_growth['Month'].astype(str).str.zfill(2)
+                        # 月別成長率（前年同月比）
+                try:
+                    monthly_growth = filtered_df.groupby(['Year', 'Month'])['Sales'].sum().reset_index()
+                    monthly_growth['YoY_Growth'] = monthly_growth.groupby('Month')['Sales'].pct_change(periods=1) * 100
+                    monthly_growth = monthly_growth.dropna()
+                    monthly_growth['Year_Month'] = monthly_growth['Year'].astype(str) + '-' + monthly_growth['Month'].astype(str).str.zfill(2)
+                except Exception as e:
+                    st.error(f"月別成長率分析エラー: {str(e)}")
+                    monthly_growth = pd.DataFrame({'Year_Month': [], 'YoY_Growth': []})
 
-                fig_monthly_growth = px.line(
-                    monthly_growth,
-                    x='Year_Month',
-                    y='YoY_Growth',
-                    title='📅 月別成長率',
-                    markers=True,
-                    labels={'x': '年月', 'y': '成長率(%)'}
-                )
-                fig_monthly_growth.update_xaxes(type='category')
-                st.plotly_chart(fig_monthly_growth, use_container_width=True)
+                if not monthly_growth.empty:
+                    fig_monthly_growth = px.line(
+                        monthly_growth,
+                        x='Year_Month',
+                        y='YoY_Growth',
+                        title='📅 月別成長率',
+                        markers=True,
+                        labels={'x': '年月', 'y': '成長率(%)'}
+                    )
+                    fig_monthly_growth.update_xaxes(type='category')
+                    st.plotly_chart(fig_monthly_growth, use_container_width=True)
+                else:
+                    st.warning("月別成長データが不十分です")
         else:
             st.info("📊 成長率分析には複数年のデータが必要です")
 
@@ -574,17 +599,25 @@ def main():
         st.markdown("### 🔗 相関分析")
 
         # 数値変数の相関マトリックス
-        numeric_cols = ['Sales', 'Profit', 'Quantity', 'Discount', 'Profit_Margin', 'Shipping_Days']
-        correlation_matrix = filtered_df[numeric_cols].corr()
+        try:
+            numeric_cols = ['Sales', 'Profit', 'Quantity', 'Discount', 'Profit_Margin', 'Shipping_Days']
+            available_cols = [col for col in numeric_cols if col in filtered_df.columns]
+            correlation_matrix = filtered_df[available_cols].corr()
+        except Exception as e:
+            st.error(f"相関分析エラー: {str(e)}")
+            correlation_matrix = pd.DataFrame()
 
-        fig_corr = px.imshow(
-            correlation_matrix,
-            text_auto=True,
-            aspect="auto",
-            title="🔗 数値変数間の相関係数",
-            color_continuous_scale='RdBu_r'
-        )
-        st.plotly_chart(fig_corr, use_container_width=True)
+        if not correlation_matrix.empty:
+            fig_corr = px.imshow(
+                correlation_matrix,
+                text_auto=True,
+                aspect="auto",
+                title="🔗 数値変数間の相関係数",
+                color_continuous_scale='RdBu_r'
+            )
+            st.plotly_chart(fig_corr, use_container_width=True)
+        else:
+            st.warning("相関分析のデータが不十分です")
 
         # 相関係数の解釈
         st.markdown("""
