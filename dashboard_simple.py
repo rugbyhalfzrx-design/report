@@ -29,7 +29,7 @@ def load_data():
             st.stop()
     
     # 日付変換
-    df['Order Date'] = pd.to_datetime(df['Order Date'])
+    df['Order Date'] = pd.to_datetime(df['Order Date'], format='%m/%d/%Y')
     df['Year'] = df['Order Date'].dt.year
     df['Month'] = df['Order Date'].dt.month
     df['YearMonth'] = df['Order Date'].dt.to_period('M').astype(str)
@@ -124,6 +124,7 @@ def main():
             markers=True
         )
         fig_monthly.update_layout(xaxis_tickangle=-45)
+        fig_monthly.update_xaxes(type='category')
         st.plotly_chart(fig_monthly, use_container_width=True)
         
         # 2つのコラム
@@ -171,6 +172,7 @@ def main():
             text='Sales'
         )
         fig_yearly.update_traces(texttemplate='%{text:$,.0f}', textposition='outside')
+        fig_yearly.update_xaxes(type='category', tickmode='linear', dtick=1)
         st.plotly_chart(fig_yearly, use_container_width=True)
         
         # セグメント分析
@@ -271,6 +273,7 @@ def main():
             )
             fig_monthly_loss.update_traces(line_color='red')
             fig_monthly_loss.update_layout(xaxis_tickangle=-45)
+            fig_monthly_loss.update_xaxes(type='category')
             st.plotly_chart(fig_monthly_loss, use_container_width=True)
 
             # セグメント別損失詳細
