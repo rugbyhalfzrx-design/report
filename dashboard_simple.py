@@ -325,7 +325,26 @@ def main():
     except:
         total_loss = 0
         loss_rate = 0
+        st.subheader("📋 データサマリー")
 
+    # データ基本情報
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info(f"**レコード数**: {len(filtered_df):,}")
+
+    with col2:
+        try:
+            start_date = filtered_df['Order Date'].min().strftime('%Y-%m-%d')
+            end_date = filtered_df['Order Date'].max().strftime('%Y-%m-%d')
+            st.info(f"**期間**: {start_date} ～ {end_date}")
+        except:
+            st.info("**期間**: データなし")
+
+    with col3:
+        customer_count = filtered_df['Customer ID'].nunique() if 'Customer ID' in filtered_df.columns else "N/A"
+        st.info(f"**顧客数**: {customer_count:,}" if isinstance(customer_count, int) else f"**顧客数**: {customer_count}")
+            
     # KPI表示
     col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -389,7 +408,8 @@ def main():
                     st.plotly_chart(fig_region, use_container_width=True)
             except Exception as e:
                 st.error(f"地域別売上エラー: {str(e)}")
-                
+
+
         with col2:
             # カテゴリ別売上
             try:
@@ -777,55 +797,7 @@ def main():
             st.error(f"相関分析エラー: {str(e)}")
 
     with tab5:
-        st.subheader("📋 データサマリー")
 
-        # データ基本情報
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.info(f"**レコード数**: {len(filtered_df):,}")
-
-        with col2:
-            try:
-                start_date = filtered_df['Order Date'].min().strftime('%Y-%m-%d')
-                end_date = filtered_df['Order Date'].max().strftime('%Y-%m-%d')
-                st.info(f"**期間**: {start_date} ～ {end_date}")
-            except:
-                st.info("**期間**: データなし")
-
-        with col3:
-            customer_count = filtered_df['Customer ID'].nunique() if 'Customer ID' in filtered_df.columns else "N/A"
-            st.info(f"**顧客数**: {customer_count:,}" if isinstance(customer_count, int) else f"**顧客数**: {customer_count}")
-
-        # 統計情報
-        st.subheader("📊 統計情報")
-        try:
-            stats = filtered_df.groupby(['Region', 'Category']).agg({
-                'Sales': ['sum', 'mean', 'count'],
-                'Profit': ['sum', 'mean']
-            }).round(2)
-
-            stats.columns = ['売上合計', '平均売上', '取引数', '利益合計', '平均利益']
-            st.dataframe(stats, use_container_width=True)
-        except Exception as e:
-            st.error(f"統計情報エラー: {str(e)}")
-
-        # 生データ表示
-        st.subheader("📄 生データ（先頭100件）")
-        try:
-            display_columns = ['Order Date', 'Region', 'Category', 'Sales', 'Profit']
-            if 'Customer Name' in filtered_df.columns:
-                display_columns.insert(1, 'Customer Name')
-            if 'Product Name' in filtered_df.columns:
-                display_columns.insert(-2, 'Product Name')
-
-            available_display_cols = [col for col in display_columns if col in filtered_df.columns]
-            st.dataframe(
-                filtered_df[available_display_cols].head(100),
-                use_container_width=True
-            )
-        except Exception as e:
-            st.error(f"データ表示エラー: {str(e)}")
 
 # 実行
 if __name__ == "__main__":
