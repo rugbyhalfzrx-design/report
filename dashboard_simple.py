@@ -796,9 +796,6 @@ def main():
         except Exception as e:
             st.error(f"相関分析エラー: {str(e)}")
 
-    with tab5:
-
-
 # 実行
 if __name__ == "__main__":
     try:
