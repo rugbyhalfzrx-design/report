@@ -373,7 +373,7 @@ def main():
             st.error(f"月別売上トレンドエラー: {str(e)}")
 
         # 3つのコラム
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
         with col1:
             # 地域別売上
@@ -389,32 +389,8 @@ def main():
                     st.plotly_chart(fig_region, use_container_width=True)
             except Exception as e:
                 st.error(f"地域別売上エラー: {str(e)}")
-
+                
         with col2:
-            # 地域別顧客数
-            try:
-                if 'Customer ID' in filtered_df.columns:
-                    region_customers = filtered_df.groupby('Region')['Customer ID'].nunique().reset_index()
-                    region_customers.columns = ['Region', 'Customer_Count']
-
-                    if len(region_customers) > 0:
-                        fig_region_customers = px.bar(
-                            region_customers,
-                            x='Region',
-                            y='Customer_Count',
-                            title='👥 地域別顧客数',
-                            color='Customer_Count',
-                            color_continuous_scale='Greens',
-                            text='Customer_Count'
-                        )
-                        fig_region_customers.update_traces(texttemplate='%{text}', textposition='outside')
-                        st.plotly_chart(fig_region_customers, use_container_width=True)
-                else:
-                    st.info("顧客IDデータが利用できません")
-            except Exception as e:
-                st.error(f"地域別顧客数エラー: {str(e)}")
-
-        with col3:
             # カテゴリ別売上
             try:
                 category_sales = filtered_df.groupby('Category')['Sales'].sum().reset_index()
