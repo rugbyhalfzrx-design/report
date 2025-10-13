@@ -375,21 +375,6 @@ def main():
         st.title("📊 分析レポート")
         st.markdown("---")
 
-        # 現状サマリー
-        st.header("📈 現状")
-
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric("総売上", "$2,297,200")
-        with col2:
-            st.metric("総利益", "$286,397")
-        with col3:
-            st.metric("利益率", "12.47%")
-        with col4:
-            st.metric("損失率", "18.7%", delta="-$156,131", delta_color="inverse")
-
-        st.markdown("---")
-
         # 主要な問題点
         st.header("⚠️ 主要な問題点")
 
