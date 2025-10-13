@@ -769,8 +769,6 @@ def main():
                         st.info("割引データが不十分です")
                 except Exception as e:
                     st.error(f"割引分析エラー: {str(e)}")
-    
-    with tab6:
 
 
 # 実行
