@@ -759,42 +759,6 @@ def main():
                 except Exception as e:
                     st.error(f"割引分析エラー: {str(e)}")
 
-        # 相関分析
-        st.markdown("### 🔗 相関分析")
-        try:
-            numeric_cols = ['Sales', 'Profit', 'Profit_Margin']
-            if 'Quantity' in filtered_df.columns:
-                numeric_cols.append('Quantity')
-            if 'Discount' in filtered_df.columns:
-                numeric_cols.append('Discount')
-            if 'Shipping_Days' in filtered_df.columns:
-                numeric_cols.append('Shipping_Days')
-
-            available_cols = [col for col in numeric_cols if col in filtered_df.columns]
-            correlation_data = filtered_df[available_cols].select_dtypes(include=[np.number])
-
-            if len(correlation_data.columns) >= 2:
-                correlation_matrix = correlation_data.corr()
-
-                fig_corr = px.imshow(
-                    correlation_matrix,
-                    text_auto=True,
-                    aspect="auto",
-                    title="🔗 数値変数間の相関係数",
-                    color_continuous_scale='RdBu_r'
-                )
-                st.plotly_chart(fig_corr, use_container_width=True)
-
-                st.markdown("""
-                **相関係数の解釈:**
-                - 1.0：完全な正の相関
-                - 0.0：相関なし
-                - -1.0：完全な負の相関
-                """)
-            else:
-                st.info("相関分析に十分な数値データがありません")
-        except Exception as e:
-            st.error(f"相関分析エラー: {str(e)}")
 
 # 実行
 if __name__ == "__main__":
