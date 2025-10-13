@@ -406,7 +406,7 @@ def main():
         st.subheader("2. 過度な割引")
         problem2_df = pd.DataFrame({
             '割引率': ['50%', '60%', '70%', '80%'],
-            '平均損失/件': ['$310', '$43', '$96', '$102']
+            '平均損失額': ['$310', '$43', '$96', '$102']
         })
         st.dataframe(problem2_df, use_container_width=True)
 
