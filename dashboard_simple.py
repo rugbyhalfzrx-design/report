@@ -372,365 +372,123 @@ def main():
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📋 分析レポート", "📈 売上分析", "🎯 詳細分析", "⚠️ 損失分析", "🚀 高度な分析", "📊 データ"])
 
     with tab1:
-        st.title("📊 Superstore事業改善提案書")
+        st.title("📊 分析レポート")
         st.markdown("---")
 
-        # エグゼクティブサマリー
-        st.header("🎯 エグゼクティブサマリー")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.subheader("現状認識")
-            st.metric("総売上", "$2,297,200", help="年間売上高")
-            st.metric("総利益", "$286,397", "利益率 12.47%")
-            st.metric("重大課題", "18.7%の取引で損失", delta="-$156,131", delta_color="inverse")
-            st.info("💡 **改善機会**: 利益率を18%以上に向上可能")
-
-        with col2:
-            st.subheader("改善効果予測")
-            st.metric("年間利益増", "$500,000以上", "+66%向上")
-            st.metric("損失削減", "68%減", "$156,131 → $50,000以下", delta_color="normal")
-            st.metric("利益率向上", "+5.5ポイント", "12.47% → 18%")
-            st.metric("投資回収期間", "6ヶ月", help="ROI 600%以上")
-
-        st.markdown("---")
-
-        # 主要課題
-        st.header("📊 分析結果に基づく主要課題")
-
-        # 課題1: 収益性
-        st.subheader("🔴 1. 収益性の課題（緊急度：★★★）")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("**深刻な損失商品**")
-            st.code("""
-商品別利益率:
-• Tables: -8.56% ($17,725損失)
-• Bookcases: -3.02% ($3,473損失)
-• Supplies: -2.55% ($1,189損失)
-            """)
-
-        with col2:
-            st.markdown("**Furnitureカテゴリの構造問題**")
-            st.warning("""
-- 利益率: わずか2.49% (他カテゴリは17%台)
-- 損失取引率: 33.7% (3件に1件が損失)
-- 根本原因: 高配送コスト + 過度な割引
-            """)
-
-        # 課題2: 割引戦略
-        st.subheader("🔴 2. 割引戦略の非効率性（緊急度：★★★）")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("**破綻している割引構造**")
-            st.code("""
-割引率別損失状況:
-• 50%割引: 平均$310損失/件
-• 60%割引: 平均$43損失/件
-• 70%割引: 平均$96損失/件
-• 80%割引: 平均$102損失/件
-            """)
-
-        with col2:
-            st.markdown("**カテゴリ別割引問題**")
-            st.error("""
-- Technology 70%割引: 平均$851損失
-- Office Supplies 80%割引: 平均$102損失
-- Furniture 40-50%割引: 平均$216-238損失
-            """)
-
-        # 課題3: 地域・配送
-        st.subheader("🔶 3. 地域・配送の最適化不足（緊急度：★★）")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("**地域格差**")
-            region_profit_data = {
-                '地域': ['West', 'East', 'South', 'Central'],
-                '利益率': [14.94, 13.48, 11.93, 7.92],
-                '評価': ['優秀', '良好', '標準', '要改善']
-            }
-            st.dataframe(pd.DataFrame(region_profit_data), use_container_width=True)
-
-        with col2:
-            st.markdown("**配送効率問題**")
-            st.info("""
-- 配送遅延率: 7日超で一部地域に集中
-- 配送ROI: 高速配送のコストと収益バランス未最適化
-- 顧客満足度: 配送遅延によるリピート率低下
-            """)
-
-        st.markdown("---")
-
-        # 戦略的改善提案
-        st.header("💡 戦略的改善提案")
-
-        # 改善戦略A
-        st.subheader("🎯 A. 収益性改善戦略")
-
-        tab_a1, tab_a2 = st.tabs(["問題商品の戦略転換", "Furnitureカテゴリ改革"])
-
-        with tab_a1:
-            st.markdown("**Tables・Bookcases対策**")
-
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-                st.success("**✅ 即座の対応**")
-                st.markdown("""
-- 現行商品の販売停止検討
-- 在庫クリアランス（最小損失での処分）
-                """)
-
-            with col2:
-                st.info("**✅ 中期対応**")
-                st.markdown("""
-- サプライヤー交渉（仕入コスト20%削減目標）
-- 高付加価値商品への転換
-- バンドル販売戦略
-                """)
-
-            with col3:
-                st.warning("**✅ 長期対応**")
-                st.markdown("""
-- プレミアムライン開発
-- カスタマイゼーションサービス導入
-                """)
-
-        with tab_a2:
-            st.markdown("**収益構造の抜本改革**")
-
-            furniture_target = pd.DataFrame({
-                '項目': ['利益率目標', '商品ミックス見直し', '配送最適化', '価格戦略'],
-                '現状': ['2.49%', '未整備', '非効率', '割引重視'],
-                '目標': ['12%以上', '高利益商品比率60%', '大型商品専用配送', '付加価値重視']
-            })
-            st.dataframe(furniture_target, use_container_width=True)
-
-        # 改善戦略B
-        st.subheader("🎯 B. 割引戦略最適化")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("**データ分析に基づく最適割引率**")
-            discount_limits = pd.DataFrame({
-                'カテゴリ': ['Furniture', 'Office Supplies', 'Technology'],
-                '現在の割引上限': ['50%', '80%', '70%'],
-                '推奨割引上限': ['15%', '25%', '30%'],
-                '削減幅': ['-35%', '-55%', '-40%']
-            })
-            st.dataframe(discount_limits, use_container_width=True)
-
-        with col2:
-            st.markdown("**条件付き割引システム**")
-            st.code("""
-スマート割引ルール:
-• 購入金額連動: $500以上で10%
-               $1000以上で15%
-• 数量連動: 10個以上で追加5%
-• 季節限定: Q4のみ最大割引適用
-• 顧客セグメント連動: VIP顧客に特別割引
-            """)
-
-        st.markdown("---")
-
-        # 実装ロードマップ
-        st.header("📅 実装ロードマップ")
-
-        phase_tab1, phase_tab2, phase_tab3 = st.tabs(["🚨 Phase 1 (1-3ヶ月)", "📈 Phase 2 (3-6ヶ月)", "🚀 Phase 3 (6-12ヶ月)"])
-
-        with phase_tab1:
-            st.subheader("緊急改善")
-
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-                st.markdown("**Week 1-2**")
-                st.markdown("""
-- Tables・Bookcases新規販売停止
-- 50%超割引の承認制導入
-- 日次損失モニタリング開始
-- 緊急対策チーム設置
-                """)
-
-            with col2:
-                st.markdown("**Week 3-8**")
-                st.markdown("""
-- カテゴリ別割引上限設定
-- 条件付き割引システム設計
-- 競合価格調査開始
-- 利益率モニタリング導入
-                """)
-
-            with col3:
-                st.markdown("**Week 9-12**")
-                st.markdown("""
-- 配送遅延根本原因分析
-- 地域別配送戦略策定
-- ROI基準配送選択システム
-- 在庫管理システム改善
-                """)
-
-        with phase_tab2:
-            st.subheader("戦略展開")
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.markdown("**Month 4-5: 商品戦略改革**")
-                st.markdown("""
-- 新商品ライン開発プロジェクト開始
-- 高利益商品の販促キャンペーン
-- バンドル商品企画・テスト販売
-- サプライヤー交渉（コスト削減）
-                """)
-
-            with col2:
-                st.markdown("**Month 5-6: 顧客戦略実装**")
-                st.markdown("""
-- RFMセグメント別マーケティング
-- VIP顧客プログラム正式ローンチ
-- パーソナライゼーション導入
-- 顧客満足度調査・改善サイクル
-                """)
-
-        with phase_tab3:
-            st.subheader("変革実現")
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.markdown("**Month 7-9: システム高度化**")
-                st.markdown("""
-- 動的価格設定システム本格導入
-- AI需要予測モデル運用開始
-- 在庫最適化システム高度化
-- リアルタイムダッシュボード完成
-                """)
-
-            with col2:
-                st.markdown("**Month 10-12: 組織・文化変革**")
-                st.markdown("""
-- データアナリティクスチーム拡充
-- 地域戦略組織の再編成
-- 成果連動評価制度導入
-- 継続改善文化の定着
-                """)
-
-        st.markdown("---")
-
-        # 期待効果・ROI
-        st.header("💰 期待効果・ROI予測")
-
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.subheader("📊 短期効果 (3ヶ月)")
-            st.metric("月間改善額", "$72,000")
-            st.markdown("""
-**内訳:**
-- 損失削減: $39,000/月
-- 割引最適化: $25,000/月
-- 配送効率化: $8,000/月
-            """)
-            st.metric("ROI", "116%")
-
-        with col2:
-            st.subheader("📈 中期効果 (6ヶ月)")
-            st.metric("売上成長", "+12%", "$275,664増")
-            st.metric("合計価値創造", "$700,000+")
-            st.metric("ROI", "600%以上")
-
-        with col3:
-            st.subheader("🚀 長期効果 (12ヶ月)")
-            st.metric("年間売上", "$2,642,000+", "+15%成長")
-            st.metric("年間利益", "$475,000+", "+66%向上")
-            st.metric("利益率", "18%達成")
-
-        st.markdown("---")
-
-        # 最優先アクション
-        st.header("⚡ 最優先アクション")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.subheader("🚨 今すぐ実行（24時間以内）")
-            st.error("""
-**緊急損失ストップ:**
-- Tables商品新規注文停止指示
-- Bookcases商品新規注文停止指示
-- 50%超割引申請の承認制導入
-- 日次損失レポート開始
-- 緊急対策チーム招集
-            """)
-
-        with col2:
-            st.subheader("📈 第1週実行項目")
-            st.info("""
-**分析環境構築:**
-- 8つの分析スクリプト本格運用開始
-- 週次ダッシュボード構築
-- KPIモニタリング体制確立
-- データ品質チェック実装
-            """)
-
-        st.markdown("---")
-
-        # 成功のカギ
-        st.header("🎉 成功のカギ")
+        # 現状サマリー
+        st.header("📈 現状")
 
         col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("総売上", "$2,297,200")
+        with col2:
+            st.metric("総利益", "$286,397")
+        with col3:
+            st.metric("利益率", "12.47%")
+        with col4:
+            st.metric("損失率", "18.7%", delta="-$156,131", delta_color="inverse")
+
+        st.markdown("---")
+
+        # 主要な問題点
+        st.header("⚠️ 主要な問題点")
+
+        # 問題1
+        st.subheader("1. 損失商品")
+        problem1_df = pd.DataFrame({
+            '商品': ['Tables', 'Bookcases', 'Supplies'],
+            '利益率': ['-8.56%', '-3.02%', '-2.55%'],
+            '損失額': ['$17,725', '$3,473', '$1,189']
+        })
+        st.dataframe(problem1_df, use_container_width=True)
+
+        # 問題2
+        st.subheader("2. 過度な割引")
+        problem2_df = pd.DataFrame({
+            '割引率': ['50%', '60%', '70%', '80%'],
+            '平均損失/件': ['$310', '$43', '$96', '$102']
+        })
+        st.dataframe(problem2_df, use_container_width=True)
+
+        # 問題3
+        st.subheader("3. カテゴリ別の課題")
+        problem3_df = pd.DataFrame({
+            'カテゴリ': ['Furniture', 'Office Supplies', 'Technology'],
+            '利益率': ['2.49%', '17.04%', '17.40%'],
+            '損失取引率': ['33.7%', '標準', '標準'],
+            '主な原因': ['高配送コスト+過度割引', '良好', '良好']
+        })
+        st.dataframe(problem3_df, use_container_width=True)
+
+        # 問題4
+        st.subheader("4. 地域格差")
+        problem4_df = pd.DataFrame({
+            '地域': ['West', 'East', 'South', 'Central'],
+            '利益率': ['14.94%', '13.48%', '11.93%', '7.92%'],
+            '評価': ['優秀', '良好', '標準', '要改善']
+        })
+        st.dataframe(problem4_df, use_container_width=True)
+
+        st.markdown("---")
+
+        # 分析結果
+        st.header("📊 分析結果")
+
+        col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("**1️⃣ データドリブン意思決定**")
-            st.markdown("""
-- 定期分析の実施
-- PDCAサイクル確立
-- リアルタイムKPI監視
+            st.markdown("### ✅ 機械学習予測モデル")
+            st.success("""
+**高精度予測を実現:**
+- 利益率予測精度: R² = 0.988 (98.8%)
+- 損失判定精度: 97.7%
+- 最重要要因: 割引率 (84.9%)
+
+**発見:**
+- 20%以上の割引で利益がマイナスに転じる
+- 商品の過去利益率が将来を予測
             """)
 
         with col2:
-            st.markdown("**2️⃣ 段階的実行**")
-            st.markdown("""
-- 小さく始める
-- リスク最小化
-- 成功事例の横展開
-            """)
+            st.markdown("### 📦 配送の影響")
+            st.info("""
+**統計的検証の結果:**
+- 配送方法は売上に統計的に有意な影響なし (p=0.952)
+- 配送日数と売上の相関ほぼゼロ (r=-0.007)
 
-        with col3:
-            st.markdown("**3️⃣ 組織コミット**")
-            st.markdown("""
-- 経営陣リーダーシップ
-- 現場の協力
-- 成果共有文化
-            """)
-
-        with col4:
-            st.markdown("**4️⃣ 継続改善**")
-            st.markdown("""
-- 定期的見直し
-- 柔軟な対応
-- イノベーション促進
+**結論:**
+- 配送スピードより コスト効率を重視すべき
+- Standard Class の損失率19.65%を削減
             """)
 
         st.markdown("---")
 
-        # フッター
-        st.success("""
-        **この提案書は、徹底的なデータ分析に基づいて作成されました。**
+        # 推奨事項
+        st.header("💡 推奨事項")
 
-        速やかな実行により、年間$500,000以上の利益向上が期待できます。
-
-        *予想投資回収期間: 6ヶ月 | ROI: 600%以上*
+        st.subheader("即時対応（緊急）")
+        st.error("""
+- Tables・Bookcases の販売停止
+- 50%超割引の承認制導入
+- 日次損失モニタリング開始
         """)
+
+        st.subheader("割引戦略の見直し")
+        discount_rec = pd.DataFrame({
+            'カテゴリ': ['Furniture', 'Office Supplies', 'Technology'],
+            '現在上限': ['50%', '80%', '70%'],
+            '推奨上限': ['15%', '25%', '30%']
+        })
+        st.dataframe(discount_rec, use_container_width=True)
+
+        st.subheader("期待効果")
+        effect_df = pd.DataFrame({
+            '期間': ['3ヶ月', '6ヶ月', '12ヶ月'],
+            '月間改善額': ['$72,000', '$116,667', '$41,667'],
+            '累計改善': ['$216,000', '$700,000', '$500,000+'],
+            'ROI': ['116%', '600%', '高']
+        })
+        st.dataframe(effect_df, use_container_width=True)
     with tab2:
         # 月別売上トレンド
         try:
@@ -1116,6 +874,245 @@ def main():
                         st.info("割引データが不十分です")
                 except Exception as e:
                     st.error(f"割引分析エラー: {str(e)}")
+
+    with tab6:
+        st.subheader("🤖 機械学習予測モデル")
+        st.markdown("---")
+
+        st.info("""
+        **analysis.ipynbで開発した高精度予測モデル**
+        - 利益率予測精度: R² = 0.988 (98.8%)
+        - 損失判定精度: 97.7%
+        """)
+
+        # モデル訓練
+        try:
+            from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+            from sklearn.model_selection import train_test_split
+
+            st.markdown("### 📊 モデル訓練中...")
+
+            # データ準備
+            model_df = df.copy()
+            model_df['Profit_Rate'] = model_df['Profit'] / model_df['Sales']
+            model_df['Profit_Flag'] = (model_df['Profit'] > 0).astype(int)
+
+            # 商品別の平均利益率
+            product_avg_profit_rate = model_df.groupby('Product ID')['Profit_Rate'].mean()
+            model_df['Product_Avg_Profit_Rate'] = model_df['Product ID'].map(product_avg_profit_rate)
+
+            # 特徴量作成
+            features = pd.get_dummies(model_df[['Category', 'Sub-Category', 'Segment']], drop_first=True)
+            features['Discount'] = model_df['Discount']
+            features['Quantity'] = model_df['Quantity']
+            features['Product_Avg_Profit_Rate'] = model_df['Product_Avg_Profit_Rate']
+
+            # 欠損値を削除
+            valid_idx = features.notna().all(axis=1)
+            features_clean = features[valid_idx]
+            profit_rate = model_df.loc[valid_idx, 'Profit_Rate']
+            profit_flag = model_df.loc[valid_idx, 'Profit_Flag']
+
+            # 1. 利益率予測モデル（回帰）
+            X_train, X_test, y_train, y_test = train_test_split(features_clean, profit_rate, test_size=0.2, random_state=42)
+            reg_model = RandomForestRegressor(n_estimators=100, random_state=42, max_depth=10)
+            reg_model.fit(X_train, y_train)
+            r2_score = reg_model.score(X_test, y_test)
+
+            # 2. 損失判定モデル（分類）
+            X_train2, X_test2, y_train2, y_test2 = train_test_split(features_clean, profit_flag, test_size=0.2, random_state=42)
+            clf_model = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=10)
+            clf_model.fit(X_train2, y_train2)
+            clf_score = clf_model.score(X_test2, y_test2)
+
+            st.success("✅ モデル訓練完了！")
+
+            # モデル精度表示
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("### 📈 利益率予測モデル（回帰）")
+                st.metric("予測精度 (R²)", f"{r2_score:.3f}", help="1.0に近いほど高精度")
+
+                if r2_score >= 0.95:
+                    st.success("🎉 非常に高精度なモデルです！")
+                elif r2_score >= 0.80:
+                    st.info("✅ 高精度なモデルです")
+                else:
+                    st.warning("⚠️ 精度改善が必要です")
+
+                # 重要な特徴量
+                st.markdown("**重要な特徴量 TOP5:**")
+                importance_df = pd.DataFrame({
+                    'Feature': features_clean.columns,
+                    'Importance': reg_model.feature_importances_
+                }).sort_values('Importance', ascending=False).head(5)
+
+                for idx, row in importance_df.iterrows():
+                    st.write(f"- {row['Feature']}: {row['Importance']:.1%}")
+
+            with col2:
+                st.markdown("### 🎯 損失判定モデル（分類）")
+                st.metric("判定精度", f"{clf_score:.3f}", help="損失が出るか正確に判定")
+
+                if clf_score >= 0.95:
+                    st.success("🎉 非常に高精度なモデルです！")
+                elif clf_score >= 0.80:
+                    st.info("✅ 高精度なモデルです")
+                else:
+                    st.warning("⚠️ 精度改善が必要です")
+
+                # 重要な特徴量
+                st.markdown("**重要な特徴量 TOP5:**")
+                importance_df2 = pd.DataFrame({
+                    'Feature': features_clean.columns,
+                    'Importance': clf_model.feature_importances_
+                }).sort_values('Importance', ascending=False).head(5)
+
+                for idx, row in importance_df2.iterrows():
+                    st.write(f"- {row['Feature']}: {row['Importance']:.1%}")
+
+            st.markdown("---")
+
+            # 割引推奨シミュレーション
+            st.markdown("### 💡 割引最適化シミュレーター")
+            st.markdown("任意の条件で利益率を予測できます")
+
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                sim_category = st.selectbox("カテゴリ", df['Category'].unique())
+
+            with col2:
+                subcategories = df[df['Category'] == sim_category]['Sub-Category'].unique()
+                sim_subcategory = st.selectbox("サブカテゴリ", subcategories)
+
+            with col3:
+                sim_segment = st.selectbox("顧客セグメント", df['Segment'].unique())
+
+            st.markdown("**割引率を変えて利益率を予測:**")
+
+            # テスト用データ作成
+            test_discounts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+
+            # サンプルデータから特徴量を取得
+            sample_data = model_df[
+                (model_df['Category'] == sim_category) &
+                (model_df['Sub-Category'] == sim_subcategory) &
+                (model_df['Segment'] == sim_segment)
+            ]
+
+            if len(sample_data) > 0:
+                # 各割引率での予測
+                predictions = []
+                loss_predictions = []
+
+                for discount in test_discounts:
+                    # 特徴量作成
+                    test_features = pd.get_dummies(pd.DataFrame({
+                        'Category': [sim_category],
+                        'Sub-Category': [sim_subcategory],
+                        'Segment': [sim_segment]
+                    }), drop_first=True)
+
+                    test_features['Discount'] = discount
+                    test_features['Quantity'] = sample_data['Quantity'].mean()
+                    test_features['Product_Avg_Profit_Rate'] = sample_data['Product_Avg_Profit_Rate'].mean()
+
+                    # 訓練データと同じ列に揃える
+                    for col in features_clean.columns:
+                        if col not in test_features.columns:
+                            test_features[col] = 0
+                    test_features = test_features[features_clean.columns]
+
+                    # 予測
+                    pred_profit_rate = reg_model.predict(test_features)[0]
+                    pred_loss = clf_model.predict(test_features)[0]
+
+                    predictions.append(pred_profit_rate * 100)
+                    loss_predictions.append("利益" if pred_loss == 1 else "損失")
+
+                # 結果表示
+                result_df = pd.DataFrame({
+                    '割引率': [f"{d:.0%}" for d in test_discounts],
+                    '予測利益率': [f"{p:.1f}%" for p in predictions],
+                    '判定': loss_predictions
+                })
+
+                st.dataframe(result_df, use_container_width=True)
+
+                # グラフ表示
+                fig = px.line(
+                    x=[f"{d:.0%}" for d in test_discounts],
+                    y=predictions,
+                    title='割引率 vs 予測利益率',
+                    labels={'x': '割引率', 'y': '予測利益率 (%)'},
+                    markers=True
+                )
+                fig.add_hline(y=0, line_dash="dash", line_color="red", annotation_text="損益分岐点")
+                fig.update_layout(height=400)
+                st.plotly_chart(fig, use_container_width=True)
+
+                # 推奨事項
+                st.markdown("### 📋 推奨事項")
+
+                # 利益が出る最大割引率を見つける
+                max_profitable_discount = 0
+                for i, (discount, profit_rate, loss_pred) in enumerate(zip(test_discounts, predictions, loss_predictions)):
+                    if loss_pred == "利益":
+                        max_profitable_discount = discount
+
+                if max_profitable_discount > 0:
+                    st.success(f"""
+                    **推奨割引上限: {max_profitable_discount:.0%}**
+
+                    この条件では、{max_profitable_discount:.0%}までの割引であれば利益を確保できます。
+                    """)
+                else:
+                    st.error("""
+                    **警告: この商品では割引すると損失が発生します**
+
+                    - 割引なしでの販売を推奨
+                    - または商品価格の見直しが必要
+                    """)
+
+            else:
+                st.warning("選択した条件のデータが見つかりません")
+
+            st.markdown("---")
+
+            # モデルの活用方法
+            st.markdown("### 🚀 このモデルの活用方法")
+
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.markdown("**1️⃣ 価格設定最適化**")
+                st.markdown("""
+                - 商品別の最適割引率を決定
+                - 損失リスクを事前に予測
+                - 利益を最大化する価格戦略
+                """)
+
+            with col2:
+                st.markdown("**2️⃣ 在庫処分判断**")
+                st.markdown("""
+                - どこまで値引きできるか予測
+                - 損失を最小化する処分価格
+                - タイミングの最適化
+                """)
+
+            with col3:
+                st.markdown("**3️⃣ リアルタイム判定**")
+                st.markdown("""
+                - 注文時に損失リスクを警告
+                - 承認フローの自動化
+                - KPIの自動モニタリング
+                """)
+
+        except Exception as e:
+            st.error(f"モデル訓練エラー: {str(e)}")
+            st.info("必要なライブラリをインストールしてください: `pip install scikit-learn`")
 
 
 # 実行
