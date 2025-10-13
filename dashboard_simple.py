@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 
 # ページ設定
 st.set_page_config(
-    page_title="Superstore Analytics Dashboard",
+    page_title="Superstore Dashboard",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -22,9 +22,7 @@ def load_data():
         # 複数のファイル名とエンコーディングを試行
         file_options = [
             ('Sample - Superstore.csv', 'latin-1'),
-            ('Sample - Superstore.csv', 'utf-8'),
-            ('Superstore.csv', 'latin-1'),
-            ('Superstore.csv', 'utf-8')
+            ('Superstore.csv', 'latin-1')
         ]
 
         df = None
@@ -180,7 +178,7 @@ def main():
     df = load_data()
 
     # タイトル
-    st.title("📊 Superstore Analytics Dashboard")
+    st.title("📊 Superstore Dashboard")
     st.markdown("---")
 
     # サイドバーフィルター
@@ -371,9 +369,22 @@ def main():
     st.markdown("---")
 
     # タブ作成
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 売上分析", "🎯 詳細分析", "⚠️ 損失分析", "🚀 高度な分析", "📊 データ"])
-
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["分析レポート", "📈 売上分析", "🎯 詳細分析", "⚠️ 損失分析", "🚀 高度な分析", "📊 データ"])
     with tab1:
+        st.header("概要")
+
+        st.write("""
+        
+        """)
+
+        st.subheader("目的")
+        st.write("")
+
+        st.subheader("分析結果")
+        st.write("""
+        
+        """)
+    with tab2:
         # 月別売上トレンド
         try:
             monthly_sales = filtered_df.groupby('YearMonth')['Sales'].sum().reset_index()
@@ -427,7 +438,7 @@ def main():
             except Exception as e:
                 st.error(f"カテゴリ別売上エラー: {str(e)}")
 
-    with tab2:
+    with tab3:
         # 年別比較
         try:
             yearly_sales = filtered_df.groupby('Year').agg({
@@ -493,7 +504,7 @@ def main():
             except Exception as e:
                 st.error(f"トップ製品分析エラー: {str(e)}")
 
-    with tab3:
+    with tab4:
         st.subheader("⚠️ 損失分析ダッシュボード")
 
         if len(loss_orders) > 0:
@@ -558,7 +569,7 @@ def main():
         else:
             st.success("🎉 選択された期間・条件では損失は発生していません！")
 
-    with tab4:
+    with tab5:
         st.subheader("🚀 高度なビジネス分析")
 
         # 地域別詳細分析
@@ -758,6 +769,8 @@ def main():
                         st.info("割引データが不十分です")
                 except Exception as e:
                     st.error(f"割引分析エラー: {str(e)}")
+    
+    with tab6:
 
 
 # 実行
