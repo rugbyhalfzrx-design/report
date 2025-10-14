@@ -369,50 +369,61 @@ def main():
     st.markdown("---")
 
     # タブ作成
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📋 分析レポート", "📈 売上分析", "🎯 詳細分析", "⚠️ 損失分析", "🚀 高度な分析", "📊 データ"])
+    tab1, tab2, tab3, tab4, tab5= st.tabs(["📋 分析レポート", "📈 売上分析", "🎯 詳細分析", "⚠️ 損失分析", "🚀 高度な分析"])
 
     with tab1:
         st.title("📊 分析レポート")
         st.markdown("---")
 
-        # 主要な問題点
-        st.header("⚠️ 主要な問題点")
+        # 現状
+        st.header("📈 現状")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("総売上", "$2,297,200")
+        with col2:
+            st.metric("総利益", "$286,397")
+        with col3:
+            st.metric("利益率", "12.47%")
+        with col4:
+            st.metric("損失率", "18.7%", delta="-$156,131", delta_color="inverse")
 
-        # 問題1
-        st.subheader("1. 損失商品")
-        problem1_df = pd.DataFrame({
-            '商品': ['Tables', 'Bookcases', 'Supplies'],
-            '利益率': ['-8.56%', '-3.02%', '-2.55%'],
-            '損失額': ['$17,725', '$3,473', '$1,189']
-        })
-        st.dataframe(problem1_df, use_container_width=True)
+        st.markdown("---")
 
-        # 問題2
-        st.subheader("2. 過度な割引")
-        problem2_df = pd.DataFrame({
-            '割引率': ['50%', '60%', '70%', '80%'],
-            '平均損失額': ['$310', '$43', '$96', '$102']
-        })
-        st.dataframe(problem2_df, use_container_width=True)
+        # 問題点
+        st.header("⚠️ 問題点")
 
-        # 問題3
-        st.subheader("3. カテゴリ別の課題")
-        problem3_df = pd.DataFrame({
-            'カテゴリ': ['Furniture', 'Office Supplies', 'Technology'],
-            '利益率': ['2.49%', '17.04%', '17.40%'],
-            '損失取引率': ['33.7%', '標準', '標準'],
-            '主な原因': ['高配送コスト+過度割引', '良好', '良好']
-        })
-        st.dataframe(problem3_df, use_container_width=True)
+        col1, col2 = st.columns(2)
 
-        # 問題4
-        st.subheader("4. 地域格差")
-        problem4_df = pd.DataFrame({
-            '地域': ['West', 'East', 'South', 'Central'],
-            '利益率': ['14.94%', '13.48%', '11.93%', '7.92%'],
-            '評価': ['優秀', '良好', '標準', '要改善']
-        })
-        st.dataframe(problem4_df, use_container_width=True)
+        with col1:
+            st.subheader("1. 損失商品")
+            problem1_df = pd.DataFrame({
+                '商品': ['Tables', 'Bookcases', 'Supplies'],
+                '利益率': ['-8.56%', '-3.02%', '-2.55%'],
+                '損失額': ['$17,725', '$3,473', '$1,189']
+            })
+            st.dataframe(problem1_df, use_container_width=True)
+
+            st.subheader("2. カテゴリ別利益率")
+            problem3_df = pd.DataFrame({
+                'カテゴリ': ['Furniture', 'Office Supplies', 'Technology'],
+                '利益率': ['2.49%', '17.04%', '17.40%']
+            })
+            st.dataframe(problem3_df, use_container_width=True)
+
+        with col2:
+            st.subheader("3. 過度な割引")
+            problem2_df = pd.DataFrame({
+                '割引率': ['50%', '60%', '70%', '80%'],
+                '平均損失/件': ['$310', '$43', '$96', '$102']
+            })
+            st.dataframe(problem2_df, use_container_width=True)
+
+            st.subheader("4. 地域別利益率")
+            problem4_df = pd.DataFrame({
+                '地域': ['West', 'East', 'South', 'Central'],
+                '利益率': ['14.94%', '13.48%', '11.93%', '7.92%']
+            })
+            st.dataframe(problem4_df, use_container_width=True)
 
         st.markdown("---")
 
@@ -422,28 +433,20 @@ def main():
         col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("### ✅ 機械学習予測モデル")
+            st.markdown("**機械学習予測**")
             st.success("""
-**高精度予測を実現:**
 - 利益率予測精度: R² = 0.988 (98.8%)
 - 損失判定精度: 97.7%
 - 最重要要因: 割引率 (84.9%)
-
-**発見:**
-- 20%以上の割引で利益がマイナスに転じる
-- 商品の過去利益率が将来を予測
+- **発見**: 20%以上の割引で利益がマイナスに
             """)
 
         with col2:
-            st.markdown("### 📦 配送の影響")
+            st.markdown("**配送分析**")
             st.info("""
-**統計的検証の結果:**
-- 配送方法は売上に統計的に有意な影響なし (p=0.952)
-- 配送日数と売上の相関ほぼゼロ (r=-0.007)
-
-**結論:**
-- 配送スピードより コスト効率を重視すべき
-- Standard Class の損失率19.65%を削減
+- 配送方法は売上に影響なし (p=0.952)
+- 配送日数と売上の相関ほぼゼロ
+- **結論**: コスト効率を重視すべき
             """)
 
         st.markdown("---")
@@ -451,14 +454,12 @@ def main():
         # 推奨事項
         st.header("💡 推奨事項")
 
-        st.subheader("即時対応（緊急）")
         st.error("""
-- Tables・Bookcases の販売停止
+**即時対応:**
+- Tables・Bookcase販売停止
 - 50%超割引の承認制導入
-- 日次損失モニタリング開始
         """)
 
-        st.subheader("割引戦略の見直し")
         discount_rec = pd.DataFrame({
             'カテゴリ': ['Furniture', 'Office Supplies', 'Technology'],
             '現在上限': ['50%', '80%', '70%'],
@@ -466,14 +467,97 @@ def main():
         })
         st.dataframe(discount_rec, use_container_width=True)
 
-        st.subheader("期待効果")
-        effect_df = pd.DataFrame({
-            '期間': ['3ヶ月', '6ヶ月', '12ヶ月'],
-            '月間改善額': ['$72,000', '$116,667', '$41,667'],
-            '累計改善': ['$216,000', '$700,000', '$500,000+'],
-            'ROI': ['116%', '600%', '高']
-        })
-        st.dataframe(effect_df, use_container_width=True)
+        st.markdown("---")
+
+        # 期待効果の計算（実データに基づく）
+        st.subheader("📈 期待効果（実データに基づく計算）")
+
+        try:
+            # 現在の損失額を計算
+            current_total_loss = abs(filtered_df[filtered_df['Profit'] < 0]['Profit'].sum())
+
+            # シナリオ1: 高割引率（50%以上）を制限した場合
+            high_discount_loss = abs(filtered_df[(filtered_df['Profit'] < 0) & (filtered_df['Discount'] >= 0.5)]['Profit'].sum())
+
+            # シナリオ2: 損失商品（Tables, Bookcases）を停止した場合
+            if 'Sub-Category' in filtered_df.columns:
+                problem_products_loss = abs(filtered_df[
+                    (filtered_df['Profit'] < 0) &
+                    (filtered_df['Sub-Category'].isin(['Tables', 'Bookcases']))
+                ]['Profit'].sum())
+            else:
+                problem_products_loss = 0
+
+            # シナリオ3: カテゴリ別割引率を推奨上限に制限した場合の推定効果
+            furniture_excessive_discount_loss = abs(filtered_df[
+                (filtered_df['Profit'] < 0) &
+                (filtered_df['Category'] == 'Furniture') &
+                (filtered_df['Discount'] > 0.15)
+            ]['Profit'].sum()) if 'Category' in filtered_df.columns else 0
+
+            # 総改善見込み（保守的な見積もり: 60%の削減）
+            total_potential_improvement = (high_discount_loss + problem_products_loss + furniture_excessive_discount_loss) * 0.6
+
+            # データの期間を取得
+            date_range_months = (filtered_df['Order Date'].max() - filtered_df['Order Date'].min()).days / 30.44
+            monthly_improvement = total_potential_improvement / date_range_months if date_range_months > 0 else 0
+
+            # 期待効果テーブル
+            effect_df = pd.DataFrame({
+                '期間': ['3ヶ月', '6ヶ月', '12ヶ月'],
+                '月間改善額': [
+                    f'${monthly_improvement:,.0f}',
+                    f'${monthly_improvement:,.0f}',
+                    f'${monthly_improvement:,.0f}'
+                ],
+                '累計改善': [
+                    f'${monthly_improvement * 3:,.0f}',
+                    f'${monthly_improvement * 6:,.0f}',
+                    f'${monthly_improvement * 12:,.0f}'
+                ],
+                'ROI': [
+                    f'{(monthly_improvement * 3 / current_total_loss * 100):.1f}%' if current_total_loss > 0 else 'N/A',
+                    f'{(monthly_improvement * 6 / current_total_loss * 100):.1f}%' if current_total_loss > 0 else 'N/A',
+                    f'{(monthly_improvement * 12 / current_total_loss * 100):.1f}%' if current_total_loss > 0 else 'N/A'
+                ]
+            })
+            st.dataframe(effect_df, use_container_width=True)
+
+            # 改善シナリオの詳細
+            st.markdown("#### 💡 改善シナリオの内訳")
+            scenario_df = pd.DataFrame({
+                'シナリオ': [
+                    '高割引率（50%以上）の制限',
+                    '損失商品（Tables/Bookcases）の停止',
+                    'Furniture割引上限15%への制限'
+                ],
+                '現在の損失額': [
+                    f'${high_discount_loss:,.0f}',
+                    f'${problem_products_loss:,.0f}',
+                    f'${furniture_excessive_discount_loss:,.0f}'
+                ],
+                '期待削減率': ['80%', '100%', '50%'],
+                '期待改善額': [
+                    f'${high_discount_loss * 0.8:,.0f}',
+                    f'${problem_products_loss * 1.0:,.0f}',
+                    f'${furniture_excessive_discount_loss * 0.5:,.0f}'
+                ]
+            })
+            st.dataframe(scenario_df, use_container_width=True)
+
+            st.info(f"""
+            **計算根拠:**
+            - 現在の総損失額: ${current_total_loss:,.0f}
+            - データ期間: {date_range_months:.1f}ヶ月
+            - 総改善見込み: ${total_potential_improvement:,.0f} (保守的見積: 60%削減)
+            - 月間改善見込み: ${monthly_improvement:,.0f}
+
+            ※この計算は現在のフィルター条件に基づいています
+            """)
+
+        except Exception as e:
+            st.error(f"期待効果計算エラー: {str(e)}")
+            st.warning("期待効果を計算できませんでした。データを確認してください。")
     with tab2:
         # 月別売上トレンド
         try:
@@ -702,6 +786,42 @@ def main():
 
         st.markdown("---")
 
+        # 配送方法分析
+        if 'Ship Mode' in filtered_df.columns:
+            st.markdown("### 📦 配送方法分析")
+            try:
+                shipping_analysis = filtered_df.groupby('Ship Mode').agg({
+                    'Sales': 'sum',
+                    'Profit': 'sum',
+                    'Shipping_Days': 'mean'
+                }).round(2)
+
+                if 'Order ID' in filtered_df.columns:
+                    order_counts = filtered_df.groupby('Ship Mode')['Order ID'].count()
+                    shipping_analysis['注文数'] = order_counts
+
+                shipping_analysis.columns = ['売上', '利益', '平均配送日数', '注文数']
+                shipping_analysis['利益率'] = (shipping_analysis['利益'] / shipping_analysis['売上'] * 100).round(2)
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    fig_shipping = px.bar(
+                        x=shipping_analysis.index,
+                        y=shipping_analysis['売上'],
+                        title='🚚 配送方法別売上',
+                        labels={'x': '配送方法', 'y': '売上'},
+                        color=shipping_analysis['売上'],
+                        color_continuous_scale='Blues'
+                    )
+                    st.plotly_chart(fig_shipping, use_container_width=True)
+
+                with col2:
+                    st.dataframe(shipping_analysis, use_container_width=True)
+
+            except Exception as e:
+                st.error(f"配送方法分析エラー: {str(e)}")
+
         # 利益率分析
         st.markdown("### 🎯 利益率分析")
         col1, col2 = st.columns(2)
@@ -742,6 +862,47 @@ def main():
             except Exception as e:
                 st.error(f"カテゴリ別利益率エラー: {str(e)}")
 
+        # 季節性分析
+        st.markdown("### 🍃 季節性分析")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # 四半期別分析
+            try:
+                quarterly_sales = filtered_df.groupby(['Year', 'Quarter'])['Sales'].sum().reset_index()
+                quarterly_sales['Year_Quarter'] = quarterly_sales['Year'].astype(str) + '-Q' + quarterly_sales['Quarter'].astype(str)
+
+                if len(quarterly_sales) > 0:
+                    fig_quarterly = px.line(
+                        quarterly_sales,
+                        x='Year_Quarter',
+                        y='Sales',
+                        title='📅 四半期別売上トレンド',
+                        markers=True
+                    )
+                    fig_quarterly.update_xaxes(type='category')
+                    st.plotly_chart(fig_quarterly, use_container_width=True)
+            except Exception as e:
+                st.error(f"四半期分析エラー: {str(e)}")
+
+        with col2:
+            # 曜日別パターン
+            try:
+                weekday_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+                weekday_sales = filtered_df.groupby('Weekday')['Sales'].mean().reindex(weekday_order, fill_value=0).reset_index()
+
+                if len(weekday_sales) > 0:
+                    fig_weekday = px.bar(
+                        weekday_sales,
+                        x='Weekday',
+                        y='Sales',
+                        title='📅 曜日別平均売上',
+                        color='Sales',
+                        color_continuous_scale='Viridis'
+                    )
+                    st.plotly_chart(fig_weekday, use_container_width=True)
+            except Exception as e:
+                st.error(f"曜日分析エラー: {str(e)}")
 
         # 割引分析
         if 'Discount' in filtered_df.columns:
