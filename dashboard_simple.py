@@ -862,48 +862,6 @@ def main():
             except Exception as e:
                 st.error(f"カテゴリ別利益率エラー: {str(e)}")
 
-        # 季節性分析
-        st.markdown("### 🍃 季節性分析")
-        col1, col2 = st.columns(2)
-
-        with col1:
-            # 四半期別分析
-            try:
-                quarterly_sales = filtered_df.groupby(['Year', 'Quarter'])['Sales'].sum().reset_index()
-                quarterly_sales['Year_Quarter'] = quarterly_sales['Year'].astype(str) + '-Q' + quarterly_sales['Quarter'].astype(str)
-
-                if len(quarterly_sales) > 0:
-                    fig_quarterly = px.line(
-                        quarterly_sales,
-                        x='Year_Quarter',
-                        y='Sales',
-                        title='📅 四半期別売上トレンド',
-                        markers=True
-                    )
-                    fig_quarterly.update_xaxes(type='category')
-                    st.plotly_chart(fig_quarterly, use_container_width=True)
-            except Exception as e:
-                st.error(f"四半期分析エラー: {str(e)}")
-
-        with col2:
-            # 曜日別パターン
-            try:
-                weekday_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-                weekday_sales = filtered_df.groupby('Weekday')['Sales'].mean().reindex(weekday_order, fill_value=0).reset_index()
-
-                if len(weekday_sales) > 0:
-                    fig_weekday = px.bar(
-                        weekday_sales,
-                        x='Weekday',
-                        y='Sales',
-                        title='📅 曜日別平均売上',
-                        color='Sales',
-                        color_continuous_scale='Viridis'
-                    )
-                    st.plotly_chart(fig_weekday, use_container_width=True)
-            except Exception as e:
-                st.error(f"曜日分析エラー: {str(e)}")
-
         # 割引分析
         if 'Discount' in filtered_df.columns:
             st.markdown("### 💸 割引効果分析")
