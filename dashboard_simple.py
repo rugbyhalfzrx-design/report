@@ -528,8 +528,6 @@ def main():
             - データ期間: {date_range_months:.1f}ヶ月
             - 総改善見込み: ${total_potential_improvement:,.0f}
             - 月間改善見込み: ${monthly_improvement:,.0f}
-
-            ※この計算は現在のフィルター条件に基づいています
             """)
 
         except Exception as e:
